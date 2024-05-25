@@ -1,0 +1,36 @@
+name: 'Dependabot Composite Action'
+author: 'eamonnk418'
+description: 'Fetch Dependabot metadata and perform various operations like labeling, approving, and merging PRs'
+inputs:
+  label:
+    description: 'Label to add for production dependencies'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Fetch Dependabot metadata
+      id: fetch_metadata
+      uses: dependabot/fetch-metadata@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Add a label for all production dependencies
+      if: ${{ steps.fetch_metadata.outputs.dependency-type == 'direct:production' }}
+      run: gh pr edit "${{ github.event.pull_request.html_url }}" --add-label "${{ inputs.LABEL }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Approve a PR
+      run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Enable auto-merge for Dependabot PRs
+      if: ${{ contains(steps.fetch_metadata.outputs.dependency-names, 'my-dependency') && steps.fetch_metadata.outputs.update-type == 'version-update:semver-patch' }}
+      run: gh pr merge --auto --merge "${{ github.event.pull_request.html_url }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

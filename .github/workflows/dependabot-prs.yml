@@ -6,8 +6,10 @@ jobs:
       pull-requests: read
     runs-on: ubuntu-latest
     steps:
-    - name: Fetch Dependabot metadata
-      id: dependabot-metadata
-      uses: ./
-      with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: ./
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"

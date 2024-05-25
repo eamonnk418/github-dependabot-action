@@ -25,14 +25,17 @@ runs:
       run: gh pr edit "${{ github.event.pull_request.html_url }}" --add-label "${{ inputs.LABEL }}"
       env:
         GH_TOKEN: ${{ inputs.github-token  }}
+      shell: sh
 
     - name: Approve a PR
       run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
       env:
         GH_TOKEN: ${{ inputs.github-token  }}
+      shell: sh
 
     - name: Enable auto-merge for Dependabot PRs
       if: ${{ contains(steps.fetch_metadata.outputs.dependency-names, 'my-dependency') && steps.fetch_metadata.outputs.update-type == 'version-update:semver-patch' }}
       run: gh pr merge --auto --merge "${{ github.event.pull_request.html_url }}"
       env:
         GH_TOKEN: ${{ inputs.github-token  }}
+      shell: sh
